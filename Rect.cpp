@@ -1,220 +1,165 @@
-/****************************************************************************
-
-								  Rect.cpp
-						Copyright 2002, John J. Bolton
-
-	----------------------------------------------------------------------
-
-	$Header: //depot/Libraries/Rect/Rect.cpp#2 $
-
-	$NoKeywords: $
-
- ****************************************************************************/
-
 #include "Rect.h"
 
 #include <cassert>
 
-
-/********************************************************************************************************************/
-/*																													*/
-/*																													*/
-/********************************************************************************************************************/
-
-bool Rect::Overlaps( Rect const & rect ) const
+bool Rect::overlaps(Rect const & rect) const
 {
-	assert( rect.IsNormal() );
-	assert( IsNormal() );
+    assert(rect.isNormal());
+    assert(isNormal());
 
-	int const	x_off	= rect.m_X - m_X;
-	int const	y_off	= rect.m_Y - m_Y;
+    int const x_off = rect.x - x;
+    int const y_off = rect.y - y;
 
-	return ( !rect.IsEmpty() &&
-			 !IsEmpty() &&
-			 -x_off < rect.m_Width &&
-			 -y_off < rect.m_Height &&
-			 x_off < m_Width &&
-			 y_off < m_Height );
+    return !rect.isEmpty() &&
+           !isEmpty() &&
+           -x_off < rect.width &&
+           -y_off < rect.height &&
+           x_off < width &&
+           y_off < height;
 }
 
-
-/********************************************************************************************************************/
-/*																													*/
-/*																													*/
-/********************************************************************************************************************/
-
-bool Rect::Contains( Rect const & rect ) const
+bool Rect::contains(Rect const & rect) const
 {
-	assert( rect.IsNormal() );
-	assert( IsNormal() );
+    assert(rect.isNormal());
+    assert(isNormal());
 
-	int const x_off = rect.m_X - m_X;
-	int const y_off = rect.m_Y - m_Y;
+    int const x_off = rect.x - x;
+    int const y_off = rect.y - y;
 
-	return ( !rect.IsEmpty() &&
-			 x_off >= 0 && m_Width - x_off >= rect.m_Width &&
-			 y_off >= 0 && m_Height - y_off >= rect.m_Height );
+    return !rect.isEmpty() &&
+           x_off >= 0 && width - x_off >= rect.width &&
+           y_off >= 0 && height - y_off >= rect.height;
 }
 
-
-/********************************************************************************************************************/
-/*																													*/
-/*																													*/
-/********************************************************************************************************************/
-
-bool Rect::Contains( int x, int y ) const
+bool Rect::contains(int xx, int yy) const
 {
-	assert( IsNormal() );
+    assert(isNormal());
 
-	int const x_off = x - m_X;
-	int const y_off = y - m_Y;
+    int const x_off = xx - x;
+    int const y_off = yy - y;
 
-	return ( ( x_off >= 0 ) && ( x_off < m_Width ) &&
-			 ( y_off >= 0 ) && ( y_off < m_Height ) );
+    return (x_off >= 0) && (x_off < width) &&
+           (y_off >= 0) && (y_off < height);
 }
 
-
-/********************************************************************************************************************/
-/*																													*/
-/*																													*/
-/********************************************************************************************************************/
-
-void Rect::Include( Rect const & rect )
+void Rect::include(Rect const & rect)
 {
-	assert( rect.IsNormal() );
-	assert( IsNormal() );
+    assert(rect.isNormal());
+    assert(isNormal());
 
-	if ( rect.IsEmpty() )
-		return;
+    if (rect.isEmpty())
+        return;
 
-	int const x_off = rect.m_X - m_X;
-	int const y_off = rect.m_Y - m_Y;
+    int const x_off = rect.x - x;
+    int const y_off = rect.y - y;
 
-	// Include right edge
+    // Include right edge
 
-	if ( m_Width < rect.m_Width + x_off )
-		m_Width = rect.m_Width + x_off;
+    if (width < rect.width + x_off)
+        width = rect.width + x_off;
 
-	// Include bottom edge
+    // Include bottom edge
 
-	if ( m_Height < rect.m_Height + y_off )
-		m_Height = rect.m_Height + y_off;
+    if (height < rect.height + y_off)
+        height = rect.height + y_off;
 
-	// Include left edge
+    // Include left edge
 
-	if ( x_off < 0 )
-	{
-		m_X = rect.m_X;
-		m_Width -= x_off;
-	}
+    if (x_off < 0)
+    {
+        x      = rect.x;
+        width -= x_off;
+    }
 
-	// Include top edge
+    // Include top edge
 
-	if ( y_off < 0 )
-	{
-		m_Y = rect.m_Y;
-		m_Height -= y_off;
-	}
+    if (y_off < 0)
+    {
+        y       = rect.y;
+        height -= y_off;
+    }
 }
 
-
-/********************************************************************************************************************/
-/*																													*/
-/*																													*/
-/********************************************************************************************************************/
-
-void Rect::Include( int x, int y )
+void Rect::include(int xx, int yy)
 {
-	assert( IsNormal() );
+    assert(isNormal());
 
-	int const x_off = x - m_X;
-	int const y_off = y - m_Y;
+    int const x_off = xx - x;
+    int const y_off = yy - y;
 
-	// Include on the right side
+    // Include on the right side
 
-	if ( m_Width <= x_off )
-		m_Width = x_off + 1;
+    if (width <= x_off)
+        width = x_off + 1;
 
-	// Include on the bottom side
+    // Include on the bottom side
 
-	if ( m_Height <= y_off )
-		m_Height = y_off + 1;
+    if (height <= y_off)
+        height = y_off + 1;
 
-	// Include on the left side
+    // Include on the left side
 
-	if ( x_off < 0 )
-	{
-		m_X = x;
-		m_Width -= x_off;
-	}
+    if (x_off < 0)
+    {
+        x      = xx;
+        width -= x_off;
+    }
 
-	// Include on the top side
+    // Include on the top side
 
-	if ( y_off < 0 )
-	{
-		m_Y = y;
-		m_Height -= y_off;
-	}
+    if (y_off < 0)
+    {
+        y       = yy;
+        height -= y_off;
+    }
 }
 
-
-/********************************************************************************************************************/
-/*																													*/
-/*																													*/
-/********************************************************************************************************************/
-
-void Rect::Clip( Rect const & rect )
+void Rect::clip(Rect const & rect)
 {
-	assert( rect.IsNormal() );
-	assert( IsNormal() );
+    assert(rect.isNormal());
+    assert(isNormal());
 
-	int const x_off = rect.m_X - m_X;
-	int const y_off = rect.m_Y - m_Y;
+    int const x_off = rect.x - x;
+    int const y_off = rect.y - y;
 
-	// Clip right edge
+    // Clip right edge
 
-	if ( m_Width > x_off + rect.m_Width )
-		m_Width =  x_off + rect.m_Width;
+    if (width > x_off + rect.width)
+        width =  x_off + rect.width;
 
-	// Clip bottom edge
+    // Clip bottom edge
 
-	if ( m_Height > y_off + rect.m_Height )
-		m_Height = y_off + rect.m_Height;
+    if (height > y_off + rect.height)
+        height = y_off + rect.height;
 
-	// Clip left edge
+    // Clip left edge
 
-	if ( x_off > 0 )
-	{
-		m_X = rect.m_X;
-		m_Width += x_off;
-	}
+    if (x_off > 0)
+    {
+        x      = rect.x;
+        width += x_off;
+    }
 
-	// Clip top edge
+    // Clip top edge
 
-	if ( y_off > 0 )
-	{
-		m_Y = rect.m_Y;
-		m_Height += y_off;
-	}
+    if (y_off > 0)
+    {
+        y       = rect.y;
+        height += y_off;
+    }
 }
 
-
-/********************************************************************************************************************/
-/*																													*/
-/*																													*/
-/********************************************************************************************************************/
-
-void Rect::Normalize()
+void Rect::normalize()
 {
-	if ( m_Width < 0 )
-	{
-		m_X -= m_Width;
-		m_Width = -m_Width;
-	}
+    if (width < 0)
+    {
+        x    -= width;
+        width = -width;
+    }
 
-	if ( m_Height < 0 )
-	{
-		m_Y -= m_Height;
-		m_Height = -m_Height;
-	}
+    if (height < 0)
+    {
+        y     -= height;
+        height = -height;
+    }
 }
