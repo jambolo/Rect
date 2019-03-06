@@ -7,8 +7,8 @@ bool Rect::overlaps(Rect const & rect) const
     assert(rect.isNormal());
     assert(isNormal());
 
-    int const x_off = rect.x - x;
-    int const y_off = rect.y - y;
+    int x_off = rect.x - x;
+    int y_off = rect.y - y;
 
     return !rect.isEmpty() &&
            !isEmpty() &&
@@ -23,8 +23,8 @@ bool Rect::contains(Rect const & rect) const
     assert(rect.isNormal());
     assert(isNormal());
 
-    int const x_off = rect.x - x;
-    int const y_off = rect.y - y;
+    int x_off = rect.x - x;
+    int y_off = rect.y - y;
 
     return !rect.isEmpty() &&
            x_off >= 0 && width - x_off >= rect.width &&
@@ -35,8 +35,8 @@ bool Rect::contains(int xx, int yy) const
 {
     assert(isNormal());
 
-    int const x_off = xx - x;
-    int const y_off = yy - y;
+    int x_off = xx - x;
+    int y_off = yy - y;
 
     return (x_off >= 0) && (x_off < width) &&
            (y_off >= 0) && (y_off < height);
@@ -50,8 +50,8 @@ void Rect::include(Rect const & rect)
     if (rect.isEmpty())
         return;
 
-    int const x_off = rect.x - x;
-    int const y_off = rect.y - y;
+    int x_off = rect.x - x;
+    int y_off = rect.y - y;
 
     // Include right edge
 
@@ -84,8 +84,8 @@ void Rect::include(int xx, int yy)
 {
     assert(isNormal());
 
-    int const x_off = xx - x;
-    int const y_off = yy - y;
+    int x_off = xx - x;
+    int y_off = yy - y;
 
     // Include on the right side
 
@@ -119,8 +119,8 @@ void Rect::clip(Rect const & rect)
     assert(rect.isNormal());
     assert(isNormal());
 
-    int const x_off = rect.x - x;
-    int const y_off = rect.y - y;
+    int x_off = rect.x - x;
+    int y_off = rect.y - y;
 
     // Clip right edge
 
@@ -137,7 +137,7 @@ void Rect::clip(Rect const & rect)
     if (x_off > 0)
     {
         x      = rect.x;
-        width += x_off;
+        width -= x_off;
     }
 
     // Clip top edge
@@ -145,7 +145,7 @@ void Rect::clip(Rect const & rect)
     if (y_off > 0)
     {
         y       = rect.y;
-        height += y_off;
+        height -= y_off;
     }
 }
 
