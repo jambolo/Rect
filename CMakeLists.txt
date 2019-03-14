@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 3.10)
 project(Rect CXX)
 
 option(BUILD_SHARED_LIBS "Build libraries as DLLs" FALSE)
-set(${PROJECT_NAME}_DOXYGEN_OUTPUT_DIRECTORY "" CACHE PATH "Doxygen output directory (empty to disable)")
 
+set(${PROJECT_NAME}_DOXYGEN_OUTPUT_DIRECTORY "" CACHE PATH "Doxygen output directory (empty to disable)")
 if(${PROJECT_NAME}_DOXYGEN_OUTPUT_DIRECTORY)
     find_package(Doxygen)
     if(DOXYGEN_FOUND)
@@ -57,6 +57,3 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
 #        add_subdirectory(test)
 #    endif()
 #endif()
-
-
-

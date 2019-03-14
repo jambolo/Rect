@@ -3,72 +3,48 @@
 
 #pragma once
 
+//! Operations on rectangles.
 class Rect
 {
 public:
 
-    // Constructor
-    Rect() = default;
-    Rect(int x_, int y_, int w_, int h_);
-
-    // Returns the X value of the right edge of the rect
+    //! Returns the X value of the right edge.
     int right() const { return x + width; }
 
-    // Returns the Y value of the bottom edge of the rect
+    //! Returns the Y value of the bottom edge.
     int bottom() const { return y + height; }
 
-    // Returns the number of pixels in the rect
+    //! Returns the area.
     int area() const { return width * height; }
 
-    // Returns true if this rect overlaps the given rect
-    bool overlaps(Rect const & rect) const;
+    //! Returns true if this rect overlaps another rect.
+    bool overlaps(Rect const & other) const;
 
-    // Returns true if this rect completely contains the given rect
-    bool contains(Rect const & rect) const;
+    //! Returns true if this rect completely contains another rect.
+    bool contains(Rect const & other) const;
 
-    // Returns true if the point is within the rect
-    bool contains(int xx, int yy) const;
+    //! Returns true if the point is within the rect.
+    bool contains(int px, int py) const;
 
-    // Returns true if the width or height == 0
-    bool isEmpty() const;
+    //! Returns true if the width or height are <= 0.
+    bool empty() const { return width <= 0 || height <= 0; }
 
-    // Returns true if the width and height >= 0
-    bool isNormal() const;
+    //! Changes the size and position to include another rect.
+    void include(Rect const & other);
 
-    // Forces the width and height to be >= 0
-    void normalize();
+    //! Changes the size and position to include a point.
+    void include(int px, int py);
 
-    // Change size to include the given rect
-    void include(Rect const & rect);
+    //! Clips this rect by another rect.
+    void clip(Rect const & other);
 
-    // Change size to include a point
-    void include(int xx, int yy);
+    int x;          //!< Anchor X
+    int y;          //!< Anchor Y
+    int width;      //!< Width (cannot be negative)
+    int height;     //!< Hieght (cannot be negative)
 
-    // Change size and position to clip to given rect
-    void clip(Rect const & rect);
-
-    int x;
-    int y;
-    int width;
-    int height;
+private:
+    bool valid() const { return width >= 0 && height >= 0; }
 };
-
-inline Rect::Rect(int x_, int y_, int w_, int h_)
-    : x(x_)
-    , y(y_)
-    , width(w_)
-    , height(h_)
-{
-}
-
-inline bool Rect::isEmpty() const
-{
-    return width <= 0 || height <= 0;
-}
-
-inline bool Rect::isNormal() const
-{
-    return width >= 0 && height >= 0;
-}
 
 #endif // !defined(RECT_RECT_H)

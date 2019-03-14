@@ -2,72 +2,72 @@
 
 #include <cassert>
 
-bool Rect::overlaps(Rect const & rect) const
+bool Rect::overlaps(Rect const & other) const
 {
-    assert(rect.isNormal());
-    assert(isNormal());
+    assert(other.valid());
+    assert(valid());
 
-    int x_off = rect.x - x;
-    int y_off = rect.y - y;
+    int x_off = other.x - x;
+    int y_off = other.y - y;
 
-    return !rect.isEmpty() &&
-           !isEmpty() &&
-           -x_off < rect.width &&
-           -y_off < rect.height &&
+    return !other.empty() &&
+           !empty() &&
+           -x_off < other.width &&
+           -y_off < other.height &&
            x_off < width &&
            y_off < height;
 }
 
-bool Rect::contains(Rect const & rect) const
+bool Rect::contains(Rect const & other) const
 {
-    assert(rect.isNormal());
-    assert(isNormal());
+    assert(other.valid());
+    assert(valid());
 
-    int x_off = rect.x - x;
-    int y_off = rect.y - y;
+    int x_off = other.x - x;
+    int y_off = other.y - y;
 
-    return !rect.isEmpty() &&
-           x_off >= 0 && width - x_off >= rect.width &&
-           y_off >= 0 && height - y_off >= rect.height;
+    return !other.empty() &&
+           x_off >= 0 && width - x_off >= other.width &&
+           y_off >= 0 && height - y_off >= other.height;
 }
 
-bool Rect::contains(int xx, int yy) const
+bool Rect::contains(int px, int py) const
 {
-    assert(isNormal());
+    assert(valid());
 
-    int x_off = xx - x;
-    int y_off = yy - y;
+    int x_off = px - x;
+    int y_off = py - y;
 
     return (x_off >= 0) && (x_off < width) &&
            (y_off >= 0) && (y_off < height);
 }
 
-void Rect::include(Rect const & rect)
+void Rect::include(Rect const & other)
 {
-    assert(rect.isNormal());
-    assert(isNormal());
+    assert(other.valid());
+    assert(valid());
 
-    if (rect.isEmpty())
+    if (other.empty())
         return;
 
-    int x_off = rect.x - x;
-    int y_off = rect.y - y;
+    int x_off = other.x - x;
+    int y_off = other.y - y;
 
     // Include right edge
 
-    if (width < rect.width + x_off)
-        width = rect.width + x_off;
+    if (width < other.width + x_off)
+        width = other.width + x_off;
 
     // Include bottom edge
 
-    if (height < rect.height + y_off)
-        height = rect.height + y_off;
+    if (height < other.height + y_off)
+        height = other.height + y_off;
 
     // Include left edge
 
     if (x_off < 0)
     {
-        x      = rect.x;
+        x      = other.x;
         width -= x_off;
     }
 
@@ -75,17 +75,17 @@ void Rect::include(Rect const & rect)
 
     if (y_off < 0)
     {
-        y       = rect.y;
+        y       = other.y;
         height -= y_off;
     }
 }
 
-void Rect::include(int xx, int yy)
+void Rect::include(int px, int py)
 {
-    assert(isNormal());
+    assert(valid());
 
-    int x_off = xx - x;
-    int y_off = yy - y;
+    int x_off = px - x;
+    int y_off = py - y;
 
     // Include on the right side
 
@@ -101,7 +101,7 @@ void Rect::include(int xx, int yy)
 
     if (x_off < 0)
     {
-        x      = xx;
+        x      = px;
         width -= x_off;
     }
 
@@ -109,34 +109,34 @@ void Rect::include(int xx, int yy)
 
     if (y_off < 0)
     {
-        y       = yy;
+        y       = py;
         height -= y_off;
     }
 }
 
-void Rect::clip(Rect const & rect)
+void Rect::clip(Rect const & other)
 {
-    assert(rect.isNormal());
-    assert(isNormal());
+    assert(other.valid());
+    assert(valid());
 
-    int x_off = rect.x - x;
-    int y_off = rect.y - y;
+    int x_off = other.x - x;
+    int y_off = other.y - y;
 
     // Clip right edge
 
-    if (width > x_off + rect.width)
-        width =  x_off + rect.width;
+    if (width > x_off + other.width)
+        width =  x_off + other.width;
 
     // Clip bottom edge
 
-    if (height > y_off + rect.height)
-        height = y_off + rect.height;
+    if (height > y_off + other.height)
+        height = y_off + other.height;
 
     // Clip left edge
 
     if (x_off > 0)
     {
-        x      = rect.x;
+        x      = other.x;
         width -= x_off;
     }
 
@@ -144,22 +144,7 @@ void Rect::clip(Rect const & rect)
 
     if (y_off > 0)
     {
-        y       = rect.y;
+        y       = other.y;
         height -= y_off;
-    }
-}
-
-void Rect::normalize()
-{
-    if (width < 0)
-    {
-        x    -= width;
-        width = -width;
-    }
-
-    if (height < 0)
-    {
-        y     -= height;
-        height = -height;
     }
 }
