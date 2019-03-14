@@ -8,6 +8,11 @@ class Rect
 {
 public:
 
+    int x;          //!< Anchor X
+    int y;          //!< Anchor Y
+    int width;      //!< Width (cannot be negative)
+    int height;     //!< Hieght (cannot be negative)
+
     //! Returns the X value of the right edge.
     int right() const { return x + width; }
 
@@ -38,13 +43,17 @@ public:
     //! Clips this rect by another rect.
     void clip(Rect const & other);
 
-    int x;          //!< Anchor X
-    int y;          //!< Anchor Y
-    int width;      //!< Width (cannot be negative)
-    int height;     //!< Hieght (cannot be negative)
-
 private:
     bool valid() const { return width >= 0 && height >= 0; }
 };
+
+//! operator ==
+bool operator ==(Rect const & lhs, Rect const & rhs)
+{
+    return lhs.x == rhs.x && lhs.y == rhs.y && lhs.width == rhs.width && lhs.height == rhs.height;
+}
+
+//! operator !=
+bool operator !=(Rect const & lhs, Rect const & rhs) { return !operator==(lhs, rhs); }
 
 #endif // !defined(RECT_RECT_H)
