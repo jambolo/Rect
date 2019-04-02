@@ -9,15 +9,7 @@ While the origin of the rectangle can be anywhere, the width and height are alwa
 ## Attributes
 ![Attributes](attributes.png)
 
-### overlaps()
-![overlaps()](overlaps.png)
-
-### contains()
-![contains()](contains.png)
+![overlaps()](overlaps.png) ![contains()](contains.png)
 
 ## Operations
-### include()
-![include()](include.png?raw=true)
-
-### clip()
-![clip()](clip.png?raw=true)
+![include()](include.png) ![clip()](clip.png)
