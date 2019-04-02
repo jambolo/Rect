@@ -1,0 +1,8 @@
+get_filename_component(Rect_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include(CMakeFindDependencyMacro)
+
+if(NOT TARGET Rect::Rect)
+    include("${Rect_CMAKE_DIR}/RectTargets.cmake")
+endif()
+
+set(Rect_LIBRARIES Rect::Rect)
