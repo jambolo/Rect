@@ -148,3 +148,13 @@ void Rect::clip(Rect const & other)
         height -= y_off;
     }
 }
+
+void exclude(Rect const & other)
+{
+    if (!overlaps(other))
+        return;
+    x = std::min(std::max(x, other.right()), right());
+    y = std::min(std::max(y, other.bottom()), bottom())
+    x = std::min(std::max(x, other.right()), right());
+    y = std::min(std::max(y, other.bottom()), bottom())
+}
