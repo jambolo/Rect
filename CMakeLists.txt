@@ -1,118 +1,130 @@
-cmake_minimum_required (VERSION 3.10)
-project(Rect VERSION 0.1.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.23)
 
-option(BUILD_SHARED_LIBS "Build libraries as DLLs" FALSE)
+project(Rect
+    VERSION 0.1.0
+    DESCRIPTION "Operations on rectangles with integer coordinates"
+    LANGUAGES CXX
+)
+
+option(BUILD_SHARED_LIBS "Build libraries as shared" OFF)
+option(RECT_BUILD_DOCS "Build API documentation with Doxygen" OFF)
 
 #########################################################################
 # Build                                                                 #
 #########################################################################
 
-set(PUBLIC_INCLUDE_PATHS
-    $<INSTALL_INTERFACE:include>    
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
+add_library(Rect)
+add_library(Rect::Rect ALIAS Rect)
 
-set(PRIVATE_INCLUDE_PATHS
-    .
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/Rect
-)
-
-set(SOURCES
-    include/Rect/Rect.h
-    
-    Rect.cpp
-)
-source_group(Sources FILES ${SOURCES})
-
-add_library(${PROJECT_NAME} ${SOURCES})
-target_include_directories(${PROJECT_NAME} PUBLIC ${PUBLIC_INCLUDE_PATHS} PRIVATE ${PRIVATE_INCLUDE_PATHS})
-target_compile_definitions(${PROJECT_NAME}
+target_sources(Rect
     PRIVATE
-        -DNOMINMAX
-        -DWIN32_LEAN_AND_MEAN
-        -DVC_EXTRALEAN
-        -D_CRT_SECURE_NO_WARNINGS
-        -D_SECURE_SCL=0
-        -D_SCL_SECURE_NO_WARNINGS
+        Rect.cpp
+    PUBLIC
+        FILE_SET HEADERS
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
+        FILES include/Rect/Rect.h
 )
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
 
-#configure_file("${PROJECT_SOURCE_DIR}/Version.h.in" "${PROJECT_BINARY_DIR}/Version.h")
+target_include_directories(Rect
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/Rect
+)
+
+target_compile_features(Rect PUBLIC cxx_std_17)
+
+set_target_properties(Rect PROPERTIES
+    CXX_EXTENSIONS OFF
+    EXPORT_NAME Rect
+)
+
+target_compile_definitions(Rect
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>
+        $<$<CXX_COMPILER_ID:MSVC>:WIN32_LEAN_AND_MEAN>
+        $<$<CXX_COMPILER_ID:MSVC>:VC_EXTRALEAN>
+        $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+        $<$<CXX_COMPILER_ID:MSVC>:_SCL_SECURE_NO_WARNINGS>
+)
 
 #########################################################################
 # Documentation                                                         #
 #########################################################################
 
-set(${PROJECT_NAME}_DOXYGEN_OUTPUT_DIRECTORY "" CACHE PATH "Doxygen output directory (empty to disable)")
-if(${PROJECT_NAME}_DOXYGEN_OUTPUT_DIRECTORY)
-    find_package(Doxygen)
-    if(DOXYGEN_FOUND)
-        set(DOXYGEN_OUTPUT_DIRECTORY ${${PROJECT_NAME}_DOXYGEN_OUTPUT_DIRECTORY})
-        configure_file(Doxyfile.in ${PROJECT_BINARY_DIR}/Doxyfile)
-        add_custom_target(doxygen ALL ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Doxyfile
-            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-            COMMENT "Generating API documentation with Doxygen" VERBATIM
-            SOURCES ${PROJECT_BINARY_DIR}/Doxyfile
+if(RECT_BUILD_DOCS AND PROJECT_IS_TOP_LEVEL)
+    find_package(Doxygen QUIET)
+    if(Doxygen_FOUND)
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+        doxygen_add_docs(doxygen
+            COMMENT "Generating API documentation with Doxygen"
+            CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         )
-    endif(DOXYGEN_FOUND)
+    else()
+        message(WARNING "Doxygen not found; docs target unavailable")
+    endif()
 endif()
 
 #########################################################################
 # Testing                                                               #
 #########################################################################
 
-if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
-    message(STATUS "Testing is enabled. Turn on BUILD_TESTING to build tests.")
-    if(BUILD_TESTING)
-        add_subdirectory(test)
-    endif()
+endif()
+
+if(BUILD_TESTING)
+    add_subdirectory(test)
 endif()
 
 #########################################################################
 # Installation                                                          #
 #########################################################################
 
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
 include(GNUInstallDirs)
-set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+include(CMakePackageConfigHelpers)
 
-install(TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}-targets
+set(rect_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/Rect")
+
+install(TARGETS Rect
+    EXPORT RectTargets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(EXPORT ${PROJECT_NAME}-targets
-    FILE ${PROJECT_NAME}Targets.cmake
-    NAMESPACE ${PROJECT_NAME}::
-    DESTINATION ${INSTALL_CONFIGDIR}
+    FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-# Create a ConfigVersion.cmake file
-include(CMakePackageConfigHelpers)
+install(EXPORT RectTargets
+    FILE RectTargets.cmake
+    NAMESPACE Rect::
+    DESTINATION ${rect_install_cmakedir}
+)
+
 write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/RectConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
-    COMPATIBILITY AnyNewerVersion
+    COMPATIBILITY SameMajorVersion
 )
 
-configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-    INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+configure_package_config_file(
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/RectConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/RectConfig.cmake"
+    INSTALL_DESTINATION "${rect_install_cmakedir}"
 )
 
-# Install the config, configversion and custom find modules
 install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-    DESTINATION ${INSTALL_CONFIGDIR}
+    "${CMAKE_CURRENT_BINARY_DIR}/RectConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/RectConfigVersion.cmake"
+    DESTINATION "${rect_install_cmakedir}"
 )
 
-# Exporting from the build tree
-export(EXPORT ${PROJECT_NAME}-targets FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake NAMESPACE ${PROJECT_NAME}::)
+export(EXPORT RectTargets
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/RectTargets.cmake"
+    NAMESPACE Rect::
+)
 
-# Register package in user's package registry
-export(PACKAGE ${PROJECT_NAME})
+if(PROJECT_IS_TOP_LEVEL)
+    export(PACKAGE Rect)
+endif()
