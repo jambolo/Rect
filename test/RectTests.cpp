@@ -302,70 +302,6 @@ TEST(RectClip, PreservesDimensionInvariant)
 }
 
 // ============================================================================
-// Exclude
-// ============================================================================
-
-TEST(RectExclude, NonOverlappingRectLeavesOriginalUntouched)
-{
-	Rect r = make_rect(0, 0, 10, 10);
-	const Rect other = make_rect(20, 20, 3, 3);
-
-	r.exclude(other);
-
-	EXPECT_EQ(r, make_rect(0, 0, 10, 10));
-}
-
-TEST(RectExclude, OverlapRemoved)
-{
-	Rect r = make_rect(0, 0, 10, 10);
-	const Rect other = make_rect(2, 2, 4, 4);
-
-	r.exclude(other);
-
-	// Should no longer overlap after exclusion
-	EXPECT_FALSE(r.overlaps(other));
-	EXPECT_GE(r.width, 0);
-	EXPECT_GE(r.height, 0);
-}
-
-TEST(RectExclude, PartialOverlapFromLeft)
-{
-	Rect r = make_rect(5, 5, 10, 10);
-	const Rect other = make_rect(0, 5, 8, 10);
-
-	r.exclude(other);
-
-	EXPECT_FALSE(r.overlaps(other));
-	EXPECT_GE(r.width, 0);
-	EXPECT_GE(r.height, 0);
-}
-
-TEST(RectExclude, PartialOverlapFromTop)
-{
-	Rect r = make_rect(5, 5, 10, 10);
-	const Rect other = make_rect(5, 0, 10, 8);
-
-	r.exclude(other);
-
-	EXPECT_FALSE(r.overlaps(other));
-	EXPECT_GE(r.width, 0);
-	EXPECT_GE(r.height, 0);
-}
-
-TEST(RectExclude, FullOverlapResultsInEmptyOrMinimalRect)
-{
-	Rect r = make_rect(5, 5, 5, 5);
-	const Rect other = make_rect(3, 3, 10, 10);
-
-	r.exclude(other);
-
-	// Fully contained; should result in valid but possibly empty rect
-	EXPECT_GE(r.width, 0);
-	EXPECT_GE(r.height, 0);
-	EXPECT_FALSE(r.overlaps(other));
-}
-
-// ============================================================================
 // Invariant and Edge Case Tests
 // ============================================================================
 
@@ -374,11 +310,6 @@ TEST(RectInvariants, DimensionsNeverNegativeAfterOperations)
 	Rect r = make_rect(5, 5, 10, 10);
 
 	r.clip(make_rect(20, 20, 5, 5));
-	EXPECT_GE(r.width, 0);
-	EXPECT_GE(r.height, 0);
-
-	r = make_rect(5, 5, 10, 10);
-	r.exclude(make_rect(0, 0, 20, 20));
 	EXPECT_GE(r.width, 0);
 	EXPECT_GE(r.height, 0);
 }

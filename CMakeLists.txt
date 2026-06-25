@@ -7,25 +7,27 @@ project(Rect
 )
 
 option(BUILD_SHARED_LIBS "Build libraries as shared" OFF)
-option(RECT_BUILD_DOCS "Build API documentation with Doxygen" OFF)
+option(${PROJECT_NAME}_BUILD_DOCS "Build API documentation with Doxygen" OFF)
 
 #########################################################################
 # Build                                                                 #
 #########################################################################
 
-add_library(Rect)
-add_library(Rect::Rect ALIAS Rect)
+add_library(${PROJECT_NAME})
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-target_sources(Rect
+target_sources(${PROJECT_NAME}
     PRIVATE
         Rect.cpp
     PUBLIC
         FILE_SET HEADERS
-        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
-        FILES include/Rect/Rect.h
+        BASE_DIRS
+            ${CMAKE_CURRENT_SOURCE_DIR}/include
+        FILES
+            include/Rect/Rect.h
 )
 
-target_include_directories(Rect
+target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
@@ -33,14 +35,14 @@ target_include_directories(Rect
         ${CMAKE_CURRENT_SOURCE_DIR}/include/Rect
 )
 
-target_compile_features(Rect PUBLIC cxx_std_17)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
-set_target_properties(Rect PROPERTIES
+set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_EXTENSIONS OFF
-    EXPORT_NAME Rect
+    EXPORT_NAME ${PROJECT_NAME}
 )
 
-target_compile_definitions(Rect
+target_compile_definitions(${PROJECT_NAME}
     PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>
         $<$<CXX_COMPILER_ID:MSVC>:WIN32_LEAN_AND_MEAN>
@@ -49,13 +51,18 @@ target_compile_definitions(Rect
         $<$<CXX_COMPILER_ID:MSVC>:_SCL_SECURE_NO_WARNINGS>
 )
 
+#configure_file("${PROJECT_SOURCE_DIR}/Version.h.in" "${PROJECT_BINARY_DIR}/Version.h")
+
 #########################################################################
 # Documentation                                                         #
 #########################################################################
 
-if(RECT_BUILD_DOCS AND PROJECT_IS_TOP_LEVEL)
-    find_package(Doxygen QUIET)
+if(${PROJECT_NAME}_BUILD_DOCS AND PROJECT_IS_TOP_LEVEL)
+    find_package(Doxygen QUIET OPTIONAL_COMPONENTS dot)
     if(Doxygen_FOUND)
+        if(NOT DEFINED DOXYGEN_OUTPUT_DIRECTORY)
+            set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs")
+        endif()
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
         doxygen_add_docs(doxygen
             COMMENT "Generating API documentation with Doxygen"
@@ -72,10 +79,12 @@ endif()
 
 if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
-endif()
-
-if(BUILD_TESTING)
-    add_subdirectory(test)
+    if(BUILD_TESTING)
+        message(STATUS "Testing is enabled.")
+        add_subdirectory(test)
+    else()
+        message(STATUS "Testing is disabled. Turn on BUILD_TESTING to build tests.")
+    endif()
 endif()
 
 #########################################################################
@@ -85,46 +94,49 @@ endif()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-set(rect_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/Rect")
+set(${PROJECT_NAME}_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 
-install(TARGETS Rect
-    EXPORT RectTargets
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+install(TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}-targets
+    FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-install(EXPORT RectTargets
-    FILE RectTargets.cmake
-    NAMESPACE Rect::
-    DESTINATION ${rect_install_cmakedir}
+install(EXPORT ${PROJECT_NAME}-targets
+    FILE "${PROJECT_NAME}Targets.cmake"
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION ${${PROJECT_NAME}_install_cmakedir}
 )
 
+# Create a ConfigVersion.cmake file
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/RectConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
+    COMPATIBILITY AnyNewerVersion
 )
 
 configure_package_config_file(
-    "${CMAKE_CURRENT_LIST_DIR}/cmake/RectConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/RectConfig.cmake"
-    INSTALL_DESTINATION "${rect_install_cmakedir}"
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/${PROJECT_NAME}Config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    INSTALL_DESTINATION "${${PROJECT_NAME}_install_cmakedir}"
 )
 
+# Install the config, configversion and custom find modules
 install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/RectConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/RectConfigVersion.cmake"
-    DESTINATION "${rect_install_cmakedir}"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+    DESTINATION "${${PROJECT_NAME}_install_cmakedir}"
 )
 
-export(EXPORT RectTargets
-    FILE "${CMAKE_CURRENT_BINARY_DIR}/RectTargets.cmake"
-    NAMESPACE Rect::
+# Exporting from the build tree
+export(EXPORT ${PROJECT_NAME}-targets
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake"
+    NAMESPACE ${PROJECT_NAME}::
 )
 
 if(PROJECT_IS_TOP_LEVEL)
-    export(PACKAGE Rect)
+    export(PACKAGE ${PROJECT_NAME})
 endif()

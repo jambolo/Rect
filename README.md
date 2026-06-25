@@ -1,4 +1,8 @@
 # Rect
+
+[![CI](https://github.com/jambolo/Rect/actions/workflows/ci.yml/badge.svg)](https://github.com/jambolo/Rect/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jambolo/Rect/branch/master/graph/badge.svg)](https://codecov.io/gh/jambolo/Rect)
+
 Operations on rectangles with integer coordinates.
 
 ## Quick Start
@@ -64,9 +68,17 @@ r.contains(8, 9);  // false - y=9 is the bottom edge (excluded)
 ```
 
 ## Attributes
+
 ![Attributes](attributes.png)
 
-![overlaps()](overlaps.png) ![contains()](contains.png)
+## Relations
+
+|          overlaps()         |          contains()         |
+| --------------------------- | --------------------------- |
+| ![overlaps()](overlaps.png) | ![contains()](contains.png) |
 
 ## Operations
-![include()](include.png) ![clip()](clip.png)
+
+|          include()          |          clip()         |
+| --------------------------- | ----------------------- |
+| ![include()](include.png)   | ![clip()](clip.png)     |

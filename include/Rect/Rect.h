@@ -53,9 +53,6 @@ public:
     //! Clips this rect by another rect.
     void clip(Rect const & other);
 
-    //! Reduces this rect so that it does not overlap another rect.
-    void exclude(Rect const & other);
-
 private:
     bool valid() const { return width >= 0 && height >= 0; }
 };

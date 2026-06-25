@@ -197,30 +197,3 @@ void Rect::clip(Rect const & other)
     if (height < 0)
         height = 0;
 }
-
-//! Reduces this rectangle to avoid overlapping with another rectangle.
-//! If the rectangles overlap, modifies this rectangle by moving its anchor point
-//! to just beyond the overlapping region. Prefers moving right or down to maintain
-//! positive dimensions. If there is no overlap, the rectangle remains unchanged.
-//!
-//! @param other The rectangle to exclude from this one
-//! @pre other.valid() - The other rectangle must have non-negative dimensions
-//! @pre valid() - This rectangle must have non-negative dimensions
-void Rect::exclude(Rect const & other)
-{
-    assert(other.valid());
-    assert(valid());
-
-    if (!overlaps(other))
-        return;
-
-    // Move the rect's anchor to just beyond the overlapping region
-    // Prefer moving right or down to maintain positive dimensions
-    int new_x = std::min(std::max(x, other.right()), right());
-    int new_y = std::min(std::max(y, other.bottom()), bottom());
-
-    width  = std::max(0, width - (new_x - x));
-    height = std::max(0, height - (new_y - y));
-    x = new_x;
-    y = new_y;
-}
